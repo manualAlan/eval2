@@ -1,0 +1,45 @@
+#include "rand_story.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "provided.h"  // to use chooseWord
+
+void parse_story(char * filename) {
+  FILE * f = fopen(filename, "r");
+  if (f == NULL) {
+    perror("Could not open file");
+    exit(EXIT_FAILURE);
+  }
+
+  char * line = NULL;
+  size_t len = 0;
+
+  while (getline(&line, &len, f) != -1) {
+    char * pos = line;
+    while (*pos != '\0') {
+      if (*pos == '_') {
+        char * end = strchr(pos + 1, '_');
+        if (end == NULL) {
+          fprintf(stderr, "Error: unmatched underscore in line.\n");
+          free(line);
+          fclose(f);
+          exit(EXIT_FAILURE);
+        }
+
+        // Replace the category between underscores with "cat"
+        *end = '\0';  // Temporarily terminate the string at the second underscore
+        printf("%s", chooseWord(pos + 1, NULL));  // Call chooseWord with NULL for step 1
+        pos = end + 1;
+      }
+      else {
+        putchar(*pos);  // Print non-underscore characters as is
+        pos++;
+      }
+    }
+  }
+
+  free(line);
+  fclose(f);
+}
